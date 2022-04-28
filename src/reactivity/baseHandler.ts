@@ -1,13 +1,13 @@
-import { isObject } from "../shared"
+import { extend, isObject } from "../shared"
 import { track, trigger } from "./effect"
 import { reactive, ReactiveFlags, readonly } from "./reactive"
 
 const get = createGetter()
 const set = createSetter()
-
 const readonlyGet = createGetter(true)
+const shallowReadonlyGet = createGetter(true, true)
 
-function createGetter(isReadonly = false) {
+function createGetter(isReadonly = false, shallow = false) {
   return function get(target, key) {
     const res = Reflect.get(target, key)
 
@@ -17,6 +17,11 @@ function createGetter(isReadonly = false) {
 
     if (key === ReactiveFlags.IS_READONLY) {
       return isReadonly
+    }
+
+    //如果是shallow 则不需要对嵌套的对象做任何操作
+    if (shallow) {
+      return res
     }
 
     //如果res是object则需要对res在做reactive/readonly
@@ -47,8 +52,14 @@ export const mutableHandlers = {
 
 export const readonlyHandlers = {
   get: readonlyGet,
-  set(target, key, value) {
-    console.warn(`key:${key}`)
+  set(target, key) {
+    console.warn(`failed to set ${key} Because it is readonly`)
     return true
   }
 }
+
+
+export const shallowReadonlyHandlers = extend({}, readonlyHandlers, {
+  get: shallowReadonlyGet
+})
+
