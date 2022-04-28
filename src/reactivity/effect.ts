@@ -1,4 +1,6 @@
 import { extend } from "../shared";
+let activeEffect
+let shouldTrack
 
 class ReactiveEffect {
   private _fn: any;
@@ -12,8 +14,17 @@ class ReactiveEffect {
   }
 
   run() {
+    if (!this.active) {
+      //已经被stop不应该收集依赖 直接return
+      return this._fn()
+    }
+
+    shouldTrack = true
     activeEffect = this;
-    return this._fn()
+    const result = this._fn()
+    //重置
+    shouldTrack = false
+    return result
   }
 
   stop() {
@@ -37,6 +48,8 @@ function cleanupEffect(effect) {
 const targetMap = new Map()
 export function track(target, key) {
   //target -> key -> dep
+  if (!isTracking()) return
+
   let depsMap = targetMap.get(target)
   if (!depsMap) {
     depsMap = new Map()
@@ -48,10 +61,15 @@ export function track(target, key) {
     depsMap.set(key, dep)
   }
 
-  if (activeEffect) {
-    dep.add(activeEffect)
-    activeEffect.deps.push(dep)
-  }
+  //已经收集的依赖就不需要在去收集
+  if (dep.has(activeEffect)) return
+
+  dep.add(activeEffect)
+  activeEffect.deps.push(dep)
+}
+
+function isTracking() {
+  return shouldTrack && activeEffect !== undefined;
 }
 
 /**
@@ -70,7 +88,6 @@ export function trigger(target, key) {
   }
 }
 
-let activeEffect
 export function effect(fn, options: any = {}) {
   const _effect = new ReactiveEffect(fn, options.scheduler)
 
