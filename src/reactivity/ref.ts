@@ -8,7 +8,7 @@ class RefImpl {
   public dep;
   public _v_isRef = true;
   constructor(value) {
-    //1.查看 value 是不是对象 如果是要用reactive包裹
+    //查看 value 是不是对象 如果是要用reactive包裹
     this._rawValue = value
     this._value = convert(value)
 
