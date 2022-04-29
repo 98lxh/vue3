@@ -30,6 +30,7 @@ class RefImpl {
   }
 }
 
+//如果是对象则用reactive包裹
 function convert(value) {
   return isObject(value) ? reactive(value) : value
 }
@@ -51,4 +52,19 @@ export function isRef(ref) {
 
 export function unRef(ref) {
   return isRef(ref) ? ref.value : ref
+}
+
+export function proxyRefs(objectWithRefs) {
+  return new Proxy(objectWithRefs, {
+    get(target, key) {
+      return unRef(Reflect.get(target, key))
+    },
+    set(target, key, value) {
+      if (isRef(target[key]) && !isRef(value)) {
+        return target[key].value = value
+      } else {
+        return Reflect.set(target, key, value)
+      }
+    }
+  })
 }
