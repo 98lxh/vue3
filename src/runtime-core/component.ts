@@ -1,10 +1,12 @@
 import { isObject } from "../shared/index";
+import { publicInstanceProxyHandler } from "./componentPublicInstance";
 
 //创建组件实例
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
-    type: vnode.type
+    type: vnode.type,
+    setupState: {}
   }
 
   return component
@@ -22,6 +24,10 @@ export function setupComponent(instance) {
 function setupStatefulComponent(instance: any) {
   //找到组件的定义
   const Component = instance.type;
+
+  //ctx
+  instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandler)
+
   const { setup } = Component
 
   if (setup) {

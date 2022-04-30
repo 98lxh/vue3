@@ -24,7 +24,7 @@ function processElement(vnode, container) {
 function mountElement(vnode, container) {
   //创建元素
   const { type, props, children } = vnode
-  const el = document.createElement(type)
+  const el = vnode.el = document.createElement(type)
 
   if (typeof children === 'string') {
     //文字节点
@@ -53,17 +53,20 @@ function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container)
 }
 
-function mountComponent(vnode: any, container) {
-  const instance = createComponentInstance(vnode)
+function mountComponent(initinalVNode: any, container) {
+  const instance = createComponentInstance(initinalVNode)
   setupComponent(instance)
-  setupRenderEffect(instance, container)
+  setupRenderEffect(instance, initinalVNode, container)
 }
 
-function setupRenderEffect(instance, container) {
-  const subTree = instance.render()
+function setupRenderEffect(instance, initinalVNode, container) {
+  const { proxy } = instance
+  const subTree = instance.render.call(proxy)
   //vnode -> patch
   //vnode -> element -> mountElement
   patch(subTree, container)
+
+  initinalVNode.el = subTree.el
 }
 
 
