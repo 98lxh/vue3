@@ -1,20 +1,20 @@
-import { isObject } from "../shared";
+import { isObject } from "../shared/index";
 
 //创建组件实例
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
-    type: vnode.instance
+    type: vnode.type
   }
 
   return component
 }
 
+//初始化
 export function setupComponent(instance) {
   //TODO
   // initProps()
   // initSlots()
-
   setupStatefulComponent(instance)
 }
 
@@ -42,7 +42,5 @@ function handleSetupResult(instance, setupResult) {
 
 function finishComponentSetup(instance) {
   const Component = instance.type
-  if (Component.render) {
-    instance.render = Component.render
-  }
+  instance.render = Component.render
 }
