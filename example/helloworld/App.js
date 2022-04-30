@@ -1,4 +1,5 @@
 import { h } from "../../lib/guide-vue.esm.js"
+import { foo } from "./Foo.js";
 
 window.self = null
 export const App = {
@@ -12,16 +13,13 @@ export const App = {
     return h('div',
       {
         id: "root",
-        class: ['red', 'hard'],
-        onClick() {
-          console.log('click')
-        },
-        onMousedown() {
-          console.log(111)
-        }
+        class: 'hard',
       },
-      'hi' + this.msg
-      // [h('p', { class: 'red' }, 'hi'), h('p', { class: 'blue' }, 'vue')]
+      [h('div', {}, 'hi,' + this.msg),
+      h(foo, {
+        count: 1
+      })
+      ]
     )
   }
 }
