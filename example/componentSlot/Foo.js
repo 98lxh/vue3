@@ -1,8 +1,9 @@
-import { h, renderSlots } from "../../lib/guide-vue.esm.js"
+import { h, renderSlots, getCurrentInstance } from "../../lib/guide-vue.esm.js"
 
 export const Foo = {
+  name: 'Foo',
   setup(props) {
-
+    console.log(getCurrentInstance())
     return {}
   },
   render() {
