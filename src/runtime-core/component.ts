@@ -6,13 +6,16 @@ import { publicInstanceProxyHandler } from "./componentPublicInstance";
 import { initSlots } from "./componentSlots";
 
 //创建组件实例
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
+
   const component = {
     vnode,
     type: vnode.type,
     setupState: {},
     props: {},
     slots: {},
+    provides: parent ? parent.provides : {},
+    parent,
     emit: () => { }
   }
   //初始化emit

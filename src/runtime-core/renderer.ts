@@ -6,10 +6,10 @@ export const Text = Symbol('Text')
 
 //render调用patch
 export function render(vnode, container) {
-  patch(vnode, container)
+  patch(vnode, container, null)
 }
 
-function patch(vnode, container) {
+function patch(vnode, container, parentComponent) {
   const { shapeFlag, type } = vnode
   //shapeFlags
   //vnode -flag
@@ -17,7 +17,7 @@ function patch(vnode, container) {
   switch (type) {
     //Fragmemt -> 只渲染children
     case Fragment:
-      processFragment(vnode, container)
+      processFragment(vnode, container, parentComponent)
       break
     case Text:
       processText(vnode, container)
@@ -25,10 +25,10 @@ function patch(vnode, container) {
     default:
       if (shapeFlag & ShapeFlags.ElEMENT) {
         //处理element
-        processElement(vnode, container)
+        processElement(vnode, container, parentComponent)
       } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
         //处理组件
-        processComponent(vnode, container)
+        processComponent(vnode, container, parentComponent)
       }
       break
   }
@@ -42,16 +42,16 @@ function processText(vnode, container) {
 }
 
 //处理fragment
-function processFragment(vnode, container) {
-  mountChildren(vnode, container)
+function processFragment(vnode, container, parentComponent) {
+  mountChildren(vnode, container, parentComponent)
 }
 
 //处理element
-function processElement(vnode, container) {
-  mountElement(vnode, container)
+function processElement(vnode, container, parentComponent) {
+  mountElement(vnode, container, parentComponent)
 }
 
-function mountElement(vnode, container) {
+function mountElement(vnode, container, parentComponent) {
   //创建元素
   const { type, props, children, shapeFlag } = vnode
   const el = vnode.el = document.createElement(type)
@@ -62,7 +62,7 @@ function mountElement(vnode, container) {
     el.textContent = children
   } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     //array_children
-    mountChildren(vnode, el)
+    mountChildren(vnode, el, parentComponent)
   }
 
   for (const key in props) {
@@ -80,19 +80,19 @@ function mountElement(vnode, container) {
 }
 
 //处理子节点
-function mountChildren(vnode, container) {
+function mountChildren(vnode, container, parentComponent) {
   vnode.children.forEach(v => {
-    patch(v, container)
+    patch(v, container, parentComponent)
   })
 }
 
 //处理组件
-function processComponent(vnode: any, container: any) {
-  mountComponent(vnode, container)
+function processComponent(vnode: any, container: any, parentComponent) {
+  mountComponent(vnode, container, parentComponent)
 }
 
-function mountComponent(initinalVNode: any, container) {
-  const instance = createComponentInstance(initinalVNode)
+function mountComponent(initinalVNode: any, container, parentComponent) {
+  const instance = createComponentInstance(initinalVNode, parentComponent)
   setupComponent(instance)
   setupRenderEffect(instance, initinalVNode, container)
 }
@@ -102,7 +102,7 @@ function setupRenderEffect(instance, initinalVNode, container) {
   const subTree = instance.render.call(proxy)
   //vnode -> patch
   //vnode -> element -> mountElement
-  patch(subTree, container)
+  patch(subTree, container, instance)
 
   initinalVNode.el = subTree.el
 }
