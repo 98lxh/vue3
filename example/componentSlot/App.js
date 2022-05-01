@@ -1,14 +1,21 @@
-import { h } from "../../lib/guide-vue.esm.js"
+import { h, createTextVnode } from "../../lib/guide-vue.esm.js"
 import { Foo } from "./Foo.js";
 
 export const App = {
+  name: 'App',
+  render() {
+    const app = h('div', {}, 'app')
+    const foo = h(Foo, {}, {
+      //具名插槽
+      header: () => [h('p', {}, 'header'), createTextVnode('hello')],
+      //作用域插槽
+      footer: ({ age }) => h('p', {}, 'footer' + age),
+    })
+
+    return h('div', {}, [app, foo])
+  },
   setup() {
     return {
     }
-  },
-  render() {
-    const app = h('div', {}, 'app')
-    const foo = h(Foo, {}, '123')
-    return h('div', {}, [app, foo])
   }
 }
