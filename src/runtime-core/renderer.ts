@@ -7,9 +7,9 @@ export const Text = Symbol('Text')
 
 export function createRender(options) {
   const {
-    createElement,
-    patchProp,
-    insert
+    createElement: hostCreateElement,
+    patchProp: hostPatchProp,
+    insert: hostInsert
   } = options
 
   //render调用patch
@@ -62,7 +62,7 @@ export function createRender(options) {
   function mountElement(vnode, container, parentComponent) {
     //创建元素
     const { type, props, children, shapeFlag } = vnode
-    const el = vnode.el = createElement(type)
+    const el = vnode.el = hostCreateElement(type)
 
     //children
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
@@ -75,10 +75,10 @@ export function createRender(options) {
 
     for (const key in props) {
       const val = props[key]
-      patchProp(el, key, val)
+      hostPatchProp(el, key, val)
     }
 
-    insert(el, container)
+    hostInsert(el, container)
     // container.append(el)
   }
 
