@@ -4,6 +4,7 @@ import { ShapeFlags } from "../shared/shapeFlags"
 import { createComponentInstance, setupComponent } from "./component"
 import { shouldUpdateComponent } from "./componentUpdateUtils"
 import { createAppAPI } from "./createApp"
+import { queueJobs } from "./scheduler"
 
 export const Fragment = Symbol('Fragment')
 export const Text = Symbol('Text')
@@ -355,6 +356,10 @@ export function createRender(options) {
         const prevSubTree = instance.subTree
         instance.subTree = subTree
         patch(prevSubTree, subTree, container, instance, anchor)
+      }
+    }, {
+      scheduler() {
+        queueJobs(instance.update)
       }
     })
   }
