@@ -7,7 +7,6 @@ const enum TagType {
 }
 
 export function baseParse(content: string) {
-
   const context = createParseContext(content)
   return createRoot(parseChildren(context))
 }
@@ -24,10 +23,25 @@ function parseChildren(context) {
     }
   }
 
+
+  if (!node) {
+    node = parseText(context)
+  }
+
   nodes.push(node)
   return nodes
 }
 
+
+function parseText(context) {
+  //获取内容content
+  const content = parseTextData(context, context.source.length)
+
+  return {
+    type: NodeTypes.TEXT,
+    content: content
+  }
+}
 
 function parseElement(context) {
   const element = parseTag(context, TagType.Start)
@@ -64,10 +78,10 @@ function parseInterpolation(context) {
 
   const rawContentLength = closeIndex - openDelimiter.length
   //message
-  const rawcontent = context.source.slice(0, rawContentLength)
+  const rawcontent = parseTextData(context, rawContentLength)
   const content = rawcontent.trim()
 
-  advance(context, rawContentLength + closeDelimiter.length)
+  advance(context, closeDelimiter.length)
 
   return {
     type: NodeTypes.INTERPOLATION,
@@ -76,6 +90,14 @@ function parseInterpolation(context) {
       content: content
     }
   }
+}
+
+function parseTextData(context, length) {
+  const content = context.source.slice(0, length)
+
+  advance(context, content.length)
+
+  return content
 }
 
 function advance(context: any, length: number) {
