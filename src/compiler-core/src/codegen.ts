@@ -69,12 +69,11 @@ function genElement(node, context) {
   const { push, helper } = context
   const { tag, children, props } = node
   push(`${helper(CREATE_ELEMENT_VNODE)}(`)
-  genNodeList(genNullable([tag, children, props]), context)
+  genNodeList(genNullable([tag, props, children]), context)
   push(')')
 }
 
 function genNodeList(nodes, context) {
-  console.log(nodes)
   const { push } = context
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i]

@@ -12,13 +12,6 @@ export function transformElement(node, context) {
       const children = node.children;
       let vnodeChildren = children[0]
 
-      const vnodeElement = {
-        type: NodeTypes.ElEMENT,
-        tag: vnodeTag,
-        props: vnodeProps,
-        children: vnodeChildren
-      }
-
       node.codegenNode = createVNodeCall(context, vnodeTag, vnodeProps, vnodeChildren)
     }
   }
