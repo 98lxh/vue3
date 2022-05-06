@@ -1,3 +1,4 @@
+import { isString } from "../../shared"
 import { NodeTypes } from "./ast"
 import { CREATE_ELEMENT_VNODE, helperMapName, TO_DISPLAY_STRING } from "./runtimeHelpers"
 
@@ -45,14 +46,52 @@ function genNode(node, context) {
     case NodeTypes.ElEMENT:
       genElement(node, context)
       break
+    case NodeTypes.COMPOUND_EXPRESSION:
+      genCompoundExpression(node, context)
   }
 }
 
+function genCompoundExpression(node, context) {
+  const children = node.children
+  const { push } = context
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i]
+    if (isString(child)) {
+      push(child)
+    } else {
+      genNode(child, context)
+    }
+  }
+}
 
+//生成元素节点代码
 function genElement(node, context) {
   const { push, helper } = context
-  const { tag } = node
-  push(`${helper(CREATE_ELEMENT_VNODE)}("${tag}"),null,"hi, " + _toDisplayString(_ctx.message)`)
+  const { tag, children, props } = node
+  push(`${helper(CREATE_ELEMENT_VNODE)}(`)
+  genNodeList(genNullable([tag, children, props]), context)
+  push(')')
+}
+
+function genNodeList(nodes, context) {
+  console.log(nodes)
+  const { push } = context
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i]
+    if (isString(node)) {
+      push(node)
+    } else {
+      genNode(node, context)
+    }
+
+    if (i < nodes.length - 1) {
+      push(", ")
+    }
+  }
+}
+
+function genNullable(args) {
+  return args.map(arg => arg || "null")
 }
 
 function genExpression(node, context) {
@@ -67,13 +106,13 @@ function genInterPolation(node, context) {
   push(')')
 }
 
-
+//生成文字节点代码
 function genText(node, context) {
   const { push } = context
   push(`'${node.content}'`)
 }
 
-
+//创建上下文
 function createCodegenContext() {
   const context = {
     code: '',
