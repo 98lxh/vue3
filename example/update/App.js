@@ -10,7 +10,6 @@ export const App = {
     })
 
     const onClick = () => {
-      console.log(111)
       count.value++;
     }
 

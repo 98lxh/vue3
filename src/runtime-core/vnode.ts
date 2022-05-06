@@ -1,8 +1,11 @@
 import { ShapeFlags } from "../shared/shapeFlags"
 import { Text } from "./renderer"
 
-export function createVnode(type, props?, children?) {
+export {
+  createVnode as createElementVNode
+}
 
+export function createVnode(type, props?, children?) {
   const vnode = {
     type,
     props,
