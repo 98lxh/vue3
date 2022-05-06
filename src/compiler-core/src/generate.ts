@@ -1,7 +1,12 @@
+import { NodeTypes } from "./ast"
+import { helperMapName, TO_DISPLAY_STRING } from "./runtimeHelpers"
+
 export function generate(ast) {
   const context = createCodegenContext()
   const { push } = context
-  push("return ")
+
+  genFunctionPreamble(ast, context)
+
   const functionName = "render"
   const args = ["_ctx", "_cache"]
   const signature = args.join(",")
@@ -16,8 +21,44 @@ export function generate(ast) {
   }
 }
 
+function genFunctionPreamble(ast, context) {
+  const { push } = context
+  const VueBinging = "Vue"
+  const aliasHelper = (s: string) => `${helperMapName[s]}: _${helperMapName[s]}`
+  push(`const { ${ast.helpers.map(aliasHelper)} } = ${VueBinging}; `)
+  push("\n")
+  push("return ")
+}
+
 
 function genNode(node, context) {
+  switch (node.type) {
+    case NodeTypes.TEXT:
+      genText(node, context)
+      break
+    case NodeTypes.INTERPOLATION:
+      genInterPolation(node, context)
+      break
+    case NodeTypes.SIMPLE_EXPRESSION:
+      genExpression(node, context)
+
+  }
+}
+
+function genExpression(node, context) {
+  const { push } = context;
+  push(`${node.content}`)
+}
+
+function genInterPolation(node, context) {
+  const { push, helper } = context
+  push(`${helper(TO_DISPLAY_STRING)}(`)
+  genNode(node.content, context)
+  push(')')
+}
+
+
+function genText(node, context) {
   const { push } = context
   push(`'${node.content}'`)
 }
@@ -28,6 +69,9 @@ function createCodegenContext() {
     code: '',
     push(source) {
       context.code += source
+    },
+    helper(key) {
+      return `_${helperMapName[key]}`
     }
   }
   return context

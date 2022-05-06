@@ -1,6 +1,7 @@
 import { baseParse } from "../src/parse"
 import { generate } from "../src/generate"
 import { transform } from "../src/transform"
+import { transformExpression } from "../src/transforms/transformExpression"
 
 describe('codegen', () => {
 
@@ -12,5 +13,15 @@ describe('codegen', () => {
     expect(code).toMatchSnapshot(`return function render(_ctx,_cache,$props,$data,$options){
       return "hi"
     }`)
+  })
+
+  it('interpolation', () => {
+    const ast = baseParse('{{message}}')
+    transform(ast, {
+      nodeTransforms: [transformExpression]
+    })
+    const { code } = generate(ast)
+    //快照测试
+    expect(code).toMatchSnapshot()
   })
 })
